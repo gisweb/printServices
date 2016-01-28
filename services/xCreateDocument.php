@@ -55,7 +55,7 @@ $result=Array("success"=>1,"message"=>"","content"=>base64_encode($content));
 
 if(isset($_REQUEST["pdf"])){
     require_once "convert2pdf.php";
-    $pdfContent = getPdfContent($content);
+    $pdfContent = convert2Pdf($content);
     if($pdfContent["success"] == 1){
         $result["pdfContent"] = base64_encode($pdfContent["content"]);
     }
