@@ -51,7 +51,10 @@ mergeFields($TBS,$data);
  
 $TBS->Show(OPENTBS_STRING);
 $content = $TBS->Source;
-$result=Array("success"=>1,"message"=>"","content"=>base64_encode($content));
+$result=Array(
+    "success"=>1,
+    "message"=>"",
+    "content"=>base64_encode($content));
 
 if(isset($_REQUEST["pdf"])){
     require_once "convert2pdf.php";

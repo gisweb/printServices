@@ -12,7 +12,6 @@ debug($debugRequest,$_REQUEST);
 $info=pathinfo($filename);
 $filename=$info["basename"];
 
-
 if($file){
     //RECUPERO FILE DA POST
     $doc = base64_decode($file,true);
@@ -41,10 +40,8 @@ else{
 }
 
 
-
 //SCRITTURA DEL FILE IN LOCALE
 $docName=DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.$filename;
-
 
 $f=fopen($docName,'w');
 if (fwrite($f,$doc)) {
@@ -57,6 +54,7 @@ fclose($f);
 if (file_exists($docName) && filesize($docName)){
 	$cmd=sprintf("HOME=/tmp/pdfout %ssoffice \"-env:UserInstallation=file:///tmp/pdfout\" --headless --invisible --nologo --convert-to pdf %s --outdir /tmp",LIBREOFFICE,escapeshellarg($docName));
 	debug($debugName,$cmd);
+
 	$res=exec($cmd);
 	$msg1="Overwriting:";// $dirname/$filename";
 	$msg2="convert";// $dirname/$filename";
@@ -68,7 +66,7 @@ if (file_exists($docName) && filesize($docName)){
         }
 	else{
 		$pdfName=str_replace('.odt','',str_replace('.docx','',$docName)).".pdf";
-		debug($debugName,"File Convertito correttamente");
+		//debug($debugName,"File Convertito correttamente");
 		$f = fopen($pdfName,'r');
 		$text=fread($f,filesize($pdfName));
 		fclose($f);
@@ -107,8 +105,7 @@ if (file_exists($docName) && filesize($docName)){
 		}
 			
 	}
-		
-		
+			
 }
 else{
 	

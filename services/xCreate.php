@@ -10,23 +10,18 @@ function mergeFields($T,$data){
     }
 }
 
-
-
 require_once "../config.php";
 $debugName=DBG_DIR."debug-create.txt";
-
 
 require_once LIB_DIR."tbs_class.php";
 require_once LIB_DIR."tbs_plugin_opentbs.php";
 $TBS = new clsTinyButStrong; // new instance of TBS
 $TBS->Plugin(TBS_INSTALL, OPENTBS_PLUGIN); // load OpenTBS plugin
 
-
 //ACQUISIZIONE DATI DI REQUEST
 $filename = (array_key_exists("filename", $_REQUEST))?($_REQUEST["filename"]):("");
 $modello=(array_key_exists("model", $_REQUEST))?($_REQUEST["model"]):("");
 $data=(array_key_exists("data", $_REQUEST))?($_REQUEST["data"]):(Array());
-
 
 $app=(array_key_exists("app", $_REQUEST))?($_REQUEST["app"]):("");
 $mode=(array_key_exists("mode", $_REQUEST))?($_REQUEST["mode"]):("");
@@ -41,9 +36,6 @@ if ( in_array( strtolower( ini_get( 'magic_quotes_gpc' ) ), array( '1', 'on' ) )
 $request=$_REQUEST;
 //DECODIFICA DELLA STRINGA JSON CON DATI
 $_REQUEST['data']=json_decode($_REQUEST["data"],true);
-
-
-
 
 
 //DEBUG DEI DATI DI REQUEST
