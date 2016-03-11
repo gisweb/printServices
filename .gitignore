@@ -1,3 +1,4 @@
-./documenti/*
-./modelli/*
-./debug/*
+documenti/*
+modelli/*
+debug/*
+config.php
