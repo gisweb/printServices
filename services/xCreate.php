@@ -9,15 +9,43 @@ function mergeFields($T,$data){
         }
     }
 }
+function randomString($length = 10) {
+    return substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, $length);
+}
 
-
-
+function getIncludedFiles($pr,$app,$filenames){
+	$dir = MODEL_DIR.DIRECTORY_SEPARATOR.$pr.DIRECTORY_SEPARATOR.$app.DIRECTORY_SEPARATOR."include".DIRECTORY_SEPARATOR;
+	$TBS = new clsTinyButStrong; // new instance of TBS
+	$TBS->Plugin(TBS_INSTALL, OPENTBS_PLUGIN); // load OpenTBS plugin
+        debug(DBG_DIR."FILE.debug","Inizio ricerca file da includere",'w+');
+	$result=Array();
+	foreach($filenames as $fname){
+		$filename=sprintf("%s%s",$dir,$fname);
+		if (file_exists($filename)){
+			debug(DBG_DIR."FILE.debug","FILE $filename trovato",'a+');
+			$TBS->LoadTemplate($filename);
+			$TBS->PlugIn(OPENTBS_SELECT_MAIN);
+			$v = $TBS->GetBlockSource("source",false,false,false);
+			$result[]= $v;
+			//if ($v) echo "<p>Found normativa $zona in file $filename</p>";
+		}
+		else{
+			$result[]="";
+                    debug(DBG_DIR."FILE.debug","Attenzione il file $filename non è trovato",'a+');
+		}
+		
+	}
+	return implode("",$result);
+}
 require_once "../config.php";
 $debugName=DBG_DIR."debug-create.txt";
 
 
 require_once LIB_DIR."tbs_class.php";
 require_once LIB_DIR."tbs_plugin_opentbs.php";
+$TBSTemp = new clsTinyButStrong; // new instance of TBS
+$TBSTemp->Plugin(TBS_INSTALL, OPENTBS_PLUGIN); // load OpenTBS plugin
+
 $TBS = new clsTinyButStrong; // new instance of TBS
 $TBS->Plugin(TBS_INSTALL, OPENTBS_PLUGIN); // load OpenTBS plugin
 
@@ -47,7 +75,7 @@ $_REQUEST['data']=json_decode($_REQUEST["data"],true);
 
 
 //DEBUG DEI DATI DI REQUEST
-debug($debugName,$_REQUEST,'a+'); 
+debug($debugName,$_REQUEST,'w'); 
 
 //MODELLO DI STAMPA
 if (!$modello){
@@ -102,8 +130,8 @@ if(!file_exists($modelName)){
 
 debug($debugName,"Mode : $mode\nLoading Template $modelName",'a+');
 
-$TBS->LoadTemplate($modelName);
-$TBS->SetOption('noerr',true);
+$TBSTemp->LoadTemplate($modelName);
+$TBSTemp->SetOption('noerr',true);
 debug($debugName,"Template Loaded",'a+');
 $data=$_REQUEST["data"];
 
@@ -126,17 +154,34 @@ switch($app){
 }
 
 if($data) {
-   $data["oggi"]=date('d/m/Y');
-   $TBS->LoadTemplate($modelName);
-   $TBS->SetOption('noerr',true);
-   array_walk_recursive($data, 'decode');
-   mergeFields($TBS,$data);
-   $HeaderAndFooter = $TBS->PlugIn(OPENTBS_GET_HEADERS_FOOTERS);
-   for($i=0;$i<count($HeaderAndFooter);$i++){
-       $f=$HeaderAndFooter[$i];
-       $TBS->LoadTemplate($f);
-       mergeFields($TBS,$data);
-   }
+	$data["oggi"]=date('d/m/Y');
+	$filesToInclude = $data["include_files"];
+//	debug(DBG_DIR."DATA-1.debug",$data,'w+');
+	unset($data["include_files"]);
+//        debug(DBG_DIR."DATA-2.debug",$data,'w+');
+        array_walk_recursive($data, 'decode');
+//        debug(DBG_DIR."DATA-3.debug",$data,'w+');
+//	foreach($data as $k=>$v){
+//	    $TBSTemp->VarRef[$k]=$v;
+//	}
+//        debug(DBG_DIR."DATA-4.debug",$data,'w+');
+	mergeFields($TBSTemp,$data);
+	if (is_array($filesToInclude) && count($filesToInclude) > 0){
+	    $tmpFile = sprintf("%s.docx",randomString());
+	    $textAsXML = getIncludedFiles($project,$app,$filesToInclude);
+	    $TBSTemp->Show(OPENTBS_FILE, $tmpFile);
+   	    debug($debugName,"File $tmpFile scritto",'a+');
+
+            $TBS->LoadTemplate($tmpFile,OPENTBS_ALREADY_XML);
+            $TBS->MergeField("include_files",$textAsXML);
+            //unlink($tmpFile);
+        }
+	else{
+            debug($debugName,"Nessun file docx da includere",'a+');
+	    $TBS = $TBSTemp;
+	}
+    
+	
 }	
 $docDir=($project)?(DOC_DIR."$project".DIRECTORY_SEPARATOR):(DOC_DIR);
 switch($mode){
@@ -195,3 +240,4 @@ switch($mode){
 }
 	
 ?>
+

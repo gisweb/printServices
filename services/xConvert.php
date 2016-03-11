@@ -55,9 +55,12 @@ fclose($f);
 
 //CONTROLLO CHE FILE SIA STATO SCRITTO
 if (file_exists($docName) && filesize($docName)){
-	$cmd=sprintf("HOME=/tmp/pdfout %ssoffice \"-env:UserInstallation=file:///tmp/pdfout\" --headless --invisible --nologo --convert-to pdf %s --outdir /tmp",LIBREOFFICE,escapeshellarg($docName));
+  
+        $cmd=sprintf("export HOME=/tmp &&  %ssoffice --headless --invisible --nologo --convert-to pdf:writer_pdf_Export  %s --outdir /tmp",LIBREOFFICE,$docName);
 	debug($debugName,$cmd);
-	$res=exec($cmd);
+        $res=shell_exec($cmd);      
+//	$cmd=sprintf("HOME=/tmp/pdfout %ssoffice \"-env:UserInstallation=file:///tmp/pdfout\" --headless --invisible --nologo --convert-to pdf %s --outdir /tmp",LIBREOFFICE,escapeshellarg($docName));
+//	$res=exec($cmd);
 	$msg1="Overwriting:";// $dirname/$filename";
 	$msg2="convert";// $dirname/$filename";
 	if (stripos($res,$msg1)===FALSE and stripos($res,$msg2)===FALSE){
