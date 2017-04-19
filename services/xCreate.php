@@ -112,6 +112,25 @@ elseif(filter_var($modello, FILTER_VALIDATE_URL)){
     }
     fclose($f);
 }
+elseif(base64_decode($modello)!==FALSE){
+    debug($debugName,"Modello ricevuto da servizio","a+");
+    $name=$filename;
+    $modelName="/tmp/$name";
+    $doc = base64_decode($modello);
+    $f=fopen($modelName,'w');
+    if (fwrite($f,$doc)) debug($debugName,"File $name scritto correttamente",'a+'); 
+    else{
+        $msg="Invio File Modello.\nIl modello $name non è stato scritto correttamente sul server";
+        debug($debugName,$msg,'a+');
+        $result=Array("success"=>0,"message"=>$msg);
+        header('Content-Type: application/json; charset=utf-8');
+        print json_encode($result);
+        return;
+    }
+    fclose($f);
+
+}
+
 else{
     $modelDir=($project)?(MODEL_DIR.$project.DIRECTORY_SEPARATOR):(MODEL_DIR);
     $modelName = ($group)?($modelDir.$app.DIRECTORY_SEPARATOR.$group.DIRECTORY_SEPARATOR.$modello):($modelDir.$app.DIRECTORY_SEPARATOR.$modello);
